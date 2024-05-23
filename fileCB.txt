@@ -1,0 +1,313 @@
+***file persistence ***
+<persistence-unit name="MariaDB">
+		<provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+		<properties>
+			<property name="jakarta.persistence.jdbc.driver"
+				value="org.mariadb.jdbc.Driver" />
+			<property name="jakarta.persistence.jdbc.url"
+				value="jdbc:mariadb://localhost:3306/ItemDB2" />
+			<property name="jakarta.persistence.jdbc.user" value="root" />
+			<property name="jakarta.persistence.jdbc.password"
+				value="28092002" />
+			<property name="jakarta.persistence.jdbc.dialect"
+				value="org.hibernate.dialect.MariaDBDialect" />
+
+			<property name="hibernate.show_sql" value="true" />
+			<property name="hibernate.format_sql" value="true" />
+			<property name="hibernate.hbm2ddl.auto" value="update" />
+
+		</properties>
+</persistence-unit>
+<persistence-unit name="MSSQL">
+        <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
+        <properties>
+            <property name="jakarta.persistence.jdbc.url"
+                      value="jdbc:sqlserver://localhost:1433;databaseName=Candidate;trustServerCertificate=true" />
+            <property name="jakarta.persistence.jdbc.user" value="sa" />
+            <property name="jakarta.persistence.jdbc.password"
+                      value="20009931" />
+            <property name="jakarta.persistence.jdbc.driver"
+                      value="com.microsoft.sqlserver.jdbc.SQLServerDriver" />
+
+            <property name="jakarta.persistence.jdbc.dialect"
+                      value="org.hibernate.dialect.SQLServerDialect" />
+
+            <property name="hibernate.show_sql" value="true" />
+            <property name="hibernate.format_sql" value="true" />
+            <property name="hibernate.hbm2ddl.auto" value="update" />
+        </properties>
+    </persistence-unit>
+
+***file pom ***
+https://maven.apache.org/xsd/maven-4.0.0.xsd (xsi:schemaLocation)
+
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>iuh.fit</groupId>
+	<artifactId>STT61_HuynhMinhThu_20010211_21</artifactId>
+	<version>0.0.1-SNAPSHOT</version>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<maven.compiler.target>11</maven.compiler.target>
+		<maven.compiler.source>11</maven.compiler.source>
+		<junit.version>5.9.2</junit.version>
+	</properties>
+	<dependencies>
+		<!-- Hibernate Core -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>6.4.4.Final</version>
+		</dependency>
+		<!-- Hibernate Testing -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-testing</artifactId>
+			<version>6.4.4.Final</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- JUnit Jupiter Engine -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<!-- SQL Server JDBC -->
+		<dependency>
+			<groupId>com.microsoft.sqlserver</groupId>
+			<artifactId>mssql-jdbc</artifactId>
+			<version>9.4.0.jre8</version>
+		</dependency>
+
+		<!-- Lombok -->
+		<dependency>
+			<groupId>org.projectlombok</groupId>
+			<artifactId>lombok</artifactId>
+			<version>1.18.30</version>
+			<scope>provided</scope>
+		</dependency>
+		<!-- MariaDB JDBC -->
+		<dependency>
+			<groupId>org.mariadb.jdbc</groupId>
+			<artifactId>mariadb-java-client</artifactId>
+			<version>3.3.3</version>
+		</dependency>
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>8.0.28</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-simple</artifactId>
+			<version>1.7.32</version>
+		</dependency>
+
+	</dependencies>
+
+	<build>
+		<plugins>
+			<!-- Compiler Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+			<!-- Surefire Plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.0.0-M5</version>
+			</plugin>
+		</plugins>
+	</build>
+</project>
+
+****templates eclipse:
+/*
+ * @ (#) ${file_name}    1.0     ${date}
+ *
+ * Copyright (c) ${year} IUH. All rights reserved
+ */
+${filecomment}
+${package_declaration}
+
+/*
+ * @description:
+ * @author: Huynh Minh Thu
+ * @date: ${time} ${date}
+ * @version: 1.0
+ */
+${typecomment}
+${type_declaration}
+
+
+*** server ***
+package server;
+
+import java.io.DataInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.util.List;
+
+import dao.StudentDAO;
+import dao.impl.StudentImpl;
+import entity.Student;
+
+public class Server {
+	public static void main(String[] args) {
+		
+		
+		try(ServerSocket server = new ServerSocket(7878)){
+			
+			System.out.println("Server is listening on port 7878");
+			
+			while (true) {
+				Socket socket = server.accept();
+				System.out.println("Client connected");
+				System.out.println("Client address: " + socket.getInetAddress().getHostName());
+				
+				Thread t = new Thread(new ClientHandler(socket));
+				t.start();
+			}
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+}
+
+class ClientHandler implements Runnable{
+	private Socket socket;
+	private StudentDAO studentDAO;
+
+	public ClientHandler(Socket socket) {
+		super();
+		this.socket = socket;
+		studentDAO = new StudentImpl();
+	}
+
+	@Override
+	public void run() {
+		
+		try {
+			
+			DataInputStream in = new DataInputStream(socket.getInputStream());
+			ObjectOutputStream out = new ObjectOutputStream(socket.getOutputStream());
+			
+			
+			int choice = 0;
+			
+			while(true) {
+				choice = in.readInt();
+				switch (choice) {
+				case 1: 
+					String title = in.readUTF();
+					List<Student> students = studentDAO.findStudentsEnrolledInCourse(title);
+					
+//					response to client
+					
+					out.writeObject(students);
+					break;
+				case 2:
+					int year = in.readInt();
+					System.out.println("Year: " + year);
+					students = studentDAO.findStudentsEnrolledInYear(year);
+					students.forEach(System.out::println);
+					out.writeObject(students);
+					break;
+				}
+			}
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	
+}
+
+*** Client ***
+package client;
+
+import java.io.DataOutputStream;
+import java.io.ObjectInputStream;
+import java.net.Socket;
+import java.util.List;
+import java.util.Scanner;
+
+import entity.Student;
+
+public class Client {
+	public static void main(String[] args) {
+		
+		try(Socket socket = new Socket("H92M17", 7878);
+				
+				Scanner sc = new Scanner(System.in);
+				){
+			
+			DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+			ObjectInputStream in = new ObjectInputStream(socket.getInputStream());
+			
+			int choice = 0;
+			
+			while(true) {
+				
+				System.out.println("Enter your choice: \n"
+						+ "1. Find students enrolled in a course\n"
+						+ "2. Find students enrolled in a year");
+				
+				choice  = sc.nextInt();
+				
+				out.writeInt(choice);
+				
+				switch (choice) {
+				case 1:
+					sc.nextLine();
+					System.out.println("Enter the course title: ");
+					String title = sc.nextLine();
+					
+					out.writeUTF(title);
+					out.flush();
+					
+//					Receive the results from the server
+					
+					List<Student> students = (List<Student>) in.readObject();
+					students.forEach(System.out::println);
+					
+					break;
+
+				case 2:
+					System.out.println("Enter the year: ");
+					int year = sc.nextInt();
+					
+					out.writeInt(year);
+					out.flush();
+					
+					List<Student> students2 = (List<Student>) in.readObject();
+					students2.forEach(System.out::println);
+					
+					break;
+				}
+			}
+			
+		}catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+	}
+}	
+
+
+
